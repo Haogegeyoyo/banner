@@ -6,7 +6,7 @@
 		*{margin: 0;padding: 0;}
 		.main{
 			width:800px;height: 450px;
-			position: relative;
+			position:relative;
 			margin: 0 auto;
 		}
 		.pic{
@@ -28,6 +28,30 @@
 		.pic img{
 			width:800px;height: 450px;
 		}
+		.main .tab{
+			width: 160px;height: 20px;position: absolute;left:50%;margin-left:-75px;bottom:15px;text-align: center;
+		}
+		.main .tab li{
+			width:15px; height: 15px; margin: 2.5px 0; background: #000;display: inline-block;border-radius: 7.5px;cursor: pointer;
+		}
+		.main .tab li.on{/*//li.on 没有空格 */  
+			background: #fff;
+		}
+		.btn{display: none;}
+		.main a{
+			text-decoration: none;font-size: 60px;color: #fff;
+			font-weight:bold;position: absolute;background: rgba(0,0,0,0.3);
+			top:0;bottom:0;margin: auto 0;display: block;width: 40px;height: 60px;line-height: 60px;text-align: center;
+		}
+		.main .btn .perv{
+			left: 10px;
+		}
+		.main .btn .next{
+			right: 10px;
+		}
+		.main .btn:hover{
+			background: rgba(0,0,0,0.6);
+		}
 	</style>
 </head>
 <body>
@@ -46,7 +70,7 @@
 			</ul>	
 		</div>
 			<ul class="tab">
-				<li></li>
+				<li class="on"></li>
 				<li></li>
 				<li></li>
 				<li></li>
@@ -54,6 +78,11 @@
 				<li></li>
 				<li></li>
 			</ul>
+			<div class="btn">
+				<a href="javascript:;"class="perv"><</a>
+				<a href="javascript:;" class="next">></a>
+			</div>
+			<!-- <p></p> -->
 	</div>
 </body>
 	<script type="text/javascript" src="./js/jquery-1.12.1.min.js"></script>
@@ -63,7 +92,9 @@
 			var	$picUl=$(".pic ul");
 			var $picLi=(".pic ul li");
 			var $tabLi=$(".tab li");
+			var $btnA=$(".main .btn a");
 			var $imgWidth=$(".pic ul li img").width();
+			var nowTime = new Date();
 			var index=0;
 
 			var timer=setInterval(function(){
@@ -71,7 +102,58 @@
 				next();
 			},2000);
 
+			$banner.hover(function(){
+				$(".main .btn").css('display','block');
+				clearInterval(timer);	
+			},function(){
+				$(".main .btn").css('display','none');
+				timer=setInterval(function(){
+				index++;
+				next();
+			},2000);
+			})
+			$tabLi.click(function(){
+				 // alert($(this).index());
+				
+				   index=$(this).index();
+					 $(this).addClass('on').siblings().removeClass('on');
+					 $picUl.animate({//通过改变ul的margin来达到轮播图片的方法，所以这里$picUl.animate
+						marginLeft:-$imgWidth*(index+1)+'px'//index++后，index=1，-$imgWidth*1没有意义，从2开始
+					},300);
+
+				})
+
+			$btnA.click(function(){
+				 if (new Date() - nowTime > 300) {//当前时间减去上一次时间大于300毫秒才执行
+				 	//next()方法动画执行300毫秒，然后后回调函数，回调判断处理index的值，如果不限制时间，
+				 	//那一直点击就会出现，index一直加却没有回调函数，所以处理不了Index,index就会脱离限制范围。
+					nowTime = new Date();
+					i=$(this).index();
+					i?index++:index--;
+					// alert(index);
+					next();	//next方法不是为下一张的方法，当index--时也则为上一张	
+					 // $(".main p").text(index);
+				}	
+			}).mousedown(function () {
+        	return false;
+    });
+			// function show(){
+			// 	$picUl.animate({
+			// 			marginLeft:-$imgWidth*(index+1)+'px'
+			// 		},300);
+			// }
 			function next(){
+
+				var indexLi=index;
+				//判断下标，最后一张时按钮也要回到第一个
+				if(indexLi>=$tabLi.length){
+					indexLi=0;
+				}
+				else if(indexLi<0){
+					indexLi=$tabLi.length - 1;
+				}
+
+				$tabLi.eq(indexLi).addClass('on').siblings().removeClass("on");
 
 				$picUl.animate({//通过改变ul的margin来达到轮播图片的方法，所以这里$picUl.animate
 					marginLeft:-$imgWidth*(index+1)+'px'//index++后，index=1，-$imgWidth*1没有意义，从2开始
@@ -83,6 +165,9 @@
 						$picUl.css('marginLeft',-$imgWidth+'px');
 						index=0;
 						// alert($tabLi.length);
+					}else if(index<0){
+						$picUl.css('marginLeft',-$imgWidth*($tabLi.length)+'px');
+						index = $tabLi.length - 1;
 					}
 				});
 			}
